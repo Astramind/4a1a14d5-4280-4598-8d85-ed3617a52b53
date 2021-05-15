@@ -7,7 +7,6 @@ import pandas as pd
 class Stocks:
     def __init__(self):
         self.data = open("Stocks_Data_5_years.csv")
-        # self.data = open("test.csv")
         self.data = self.data.read().splitlines()
         self.file = [val.strip().split(',') for val in self.data]
         self.column_map = {
@@ -82,10 +81,12 @@ class Stocks:
             right_list_index += 1
             sorted_list_index += 1
 
-    def default_sort(self, column_name='Name'):
+    def default_sort(self, file_name='data_sorted_by_company_name.csv', column_name='Name', asc='0'):
         """
         Sort the data in ascending order by column name
         :param column_name: take default value as Name 
+        :param file_name: file name to write output
+        :param asc: determines the sorting order as ascending(0) or descending(1), by default its ascending
         """
         data_copy = copy.deepcopy(self.data)
         data_size = len(data_copy)
@@ -103,8 +104,10 @@ class Stocks:
                 self.merge(data_copy, left, mid, right_end, self.column_map[column_name])
                 left = left + 2 * size
             size = size * 2
+        if asc == '1':
+            data_copy = data_copy[::-1]
         # Writing in CSV file
-        file = open("data_sorted_by_company_name.csv", 'w+', newline='')
+        file = open(file_name, 'w+', newline='')
         with file:
             writing = csv.writer(file)
             writing.writerow(self.file[0])
@@ -150,15 +153,15 @@ class Stocks:
             right_list_index += 1
             sorted_list_index += 1
 
-    def sort_on_company_name_or_date_range(self, start_date=None, end_date=None, asc='0'):
+    def sort_on_company_name_or_date_range(self, start_date='', end_date='', asc='0'):
         """
          Sort the stock data by company name as default or by date range using merge sort
         :param start_date: starting date as string in yyyy-mm-dd format by default take None
         :param end_date: ending date as string in yyyy-mm-dd format by default take Node
         :param asc: determines the sorting order as ascending(0) or descending(1), by default its ascending
         """
-        if start_date is None and end_date is None:
-            self.default_sort()
+        if start_date == '' or end_date == '':
+            self.default_sort(file_name='data_sorted_by_company_name_OR_date.csv', asc=asc)
         else:
             data_copy = copy.deepcopy(self.data)
             filtered_data = self.filter_data(data_copy, start_date, end_date)
@@ -246,6 +249,7 @@ def main():
         if input_function == 1:
             stock.default_sort()
         if input_function == 2:
+            print("Start and End date fields can be left empty to sort with company name")
             start_date = str(input(" Enter start_date as string separated by '-': "))
             end_date = str(input(" Enter end_date as string separated by '-': "))
             asc = str(input("Enter 1 for descending else default is ascending: "))
